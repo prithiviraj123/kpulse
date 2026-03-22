@@ -1,0 +1,39 @@
+version: 2
+builds:
+  - main: ./cmd/kpulse
+    binary: kpulse
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - formats: ['tar.gz']
+    format_overrides:
+      - goos: windows
+        formats: ['zip']
+
+dockers:
+  - image_templates:
+      - "prithiviraj123/kpulse:{{ .Tag }}"
+      - "prithiviraj123/kpulse:latest"
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--platform=linux/amd64"
+
+brews:
+  - repository:
+      owner: prithiviraj123
+      name: homebrew-tap
+    homepage: "https://github.com/prithiviraj123/kpulse"
+    description: "Kubernetes cluster health & cost snapshot"
+    install: |
+      bin.install "kpulse"
+
+changelog:
+  sort: asc
