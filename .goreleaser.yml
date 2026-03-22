@@ -29,14 +29,5 @@ dockers:
     goarch: amd64
     goos: linux
 
-brews:
-  - repository:
-      owner: prithiviraj123
-      name: homebrew-tap
-    homepage: "https://github.com/prithiviraj123/kpulse"
-    description: "Kubernetes cluster health & cost snapshot"
-    install: |
-      bin.install "kpulse"
-
 changelog:
   sort: asc
