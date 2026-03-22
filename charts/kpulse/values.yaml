@@ -1,0 +1,7 @@
+image:
+  repository: kpulse/kpulse
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  name: kpulse
