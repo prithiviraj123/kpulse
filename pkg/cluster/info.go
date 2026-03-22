@@ -79,21 +79,17 @@ func Show(k *KClient) {
 			for key, val := range nodeList.Items[0].Labels {
 				if strings.Contains(key, "topology.kubernetes.io/region") {
 					region = val
-					break
+				}
+				if strings.Contains(key, "alpha.eksctl.io/cluster-name") || strings.Contains(key, "eks.amazonaws.com/cluster") {
+					k.ClusterName = val
 				}
 			}
 		}
-	}
-
-	metricsStatus := "✅ Available"
-	if !k.HasMetrics {
-		metricsStatus = "⚠️  Not installed (showing requests/limits only)"
 	}
 
 	fmt.Println()
 	fmt.Println("╔══════════════════════════════════════════════════════════════╗")
 	fmt.Printf("║  🔵 KPULSE — Cluster: %-37s ║\n", k.ClusterName)
 	fmt.Printf("║     Version: %-10s  Region: %-8s  Nodes: %-5d    ║\n", k.ClusterVersion, region, nodeCount)
-	fmt.Printf("║     Metrics Server: %-39s ║\n", metricsStatus)
 	fmt.Println("╚══════════════════════════════════════════════════════════════╝")
 }
