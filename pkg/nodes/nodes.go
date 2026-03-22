@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/prithiviraj123/kpulse/pkg/cluster"
 	corev1 "k8s.io/api/core/v1"
@@ -119,38 +120,31 @@ func Show(k *cluster.KClient) {
 	}
 
 	fmt.Println("\n📦 NODES")
-	if k.HasMetrics {
-		fmt.Println("┌────────────────────────┬──────────┬──────────────┬──────────────┬──────────────┬──────────────┬──────────┐")
-		fmt.Println("│ Node                   │ Status   │ CPU Req      │ CPU Usage    │ MEM Req      │ MEM Usage    │ Pods     │")
-		fmt.Println("├────────────────────────┼──────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────┤")
-		for _, n := range nodeInfos {
-			fmt.Printf("│ %-22s │ %-8s │ %5dm/%-5dm │ %5dm (%2d%%) │ %s/%-5s │ %s (%2d%%) │ %3d/%-3d  │\n",
-				n.Name, n.Status,
-				n.CPUReq, n.CPUCap,
-				n.CPUUsage, pct(n.CPUUsage, n.CPUCap),
-				fmtMem(n.MemReq), fmtMem(n.MemCap),
-				fmtMem(n.MemUsage), pct(n.MemUsage, n.MemCap),
-				n.Pods, n.PodCap)
+	for i, n := range nodeInfos {
+		if i > 0 {
+			fmt.Println()
 		}
-		fmt.Println("└────────────────────────┴──────────┴──────────────┴──────────────┴──────────────┴──────────────┴──────────┘")
-	} else {
-		fmt.Println("┌────────────────────────┬──────────┬──────────────┬──────────────┬──────────┬────────────┐")
-		fmt.Println("│ Node                   │ Status   │ CPU (req/cap)│ MEM (req/cap)│ Pods     │ Instance   │")
-		fmt.Println("├────────────────────────┼──────────┼──────────────┼──────────────┼──────────┼────────────┤")
-		for _, n := range nodeInfos {
-			fmt.Printf("│ %-22s │ %-8s │ %5dm/%-5dm │ %s/%-5s │ %3d/%-3d  │ %-10s │\n",
-				n.Name, n.Status,
-				n.CPUReq, n.CPUCap,
-				fmtMem(n.MemReq), fmtMem(n.MemCap),
-				n.Pods, n.PodCap, n.Instance)
+		fmt.Printf("  Node %d\n", i+1)
+		fmt.Println("  ┌──────────────────┬──────────────────────────┐")
+		fmt.Printf("  │ Name             │ %-24s │\n", n.Name)
+		fmt.Printf("  │ Instance         │ %-24s │\n", n.Instance)
+		fmt.Printf("  │ CPU (req/cap)    │ %-24s │\n", fmt.Sprintf("%dm / %dm", n.CPUReq, n.CPUCap))
+		fmt.Printf("  │ Memory (req/cap) │ %-24s │\n", fmt.Sprintf("%s / %s", fmtMem(n.MemReq), fmtMem(n.MemCap)))
+		if k.HasMetrics {
+			fmt.Printf("  │ CPU Usage        │ %-24s │\n", fmt.Sprintf("%dm (%d%%)", n.CPUUsage, pct(n.CPUUsage, n.CPUCap)))
+			fmt.Printf("  │ Memory Usage     │ %-24s │\n", fmt.Sprintf("%s (%d%%)", fmtMem(n.MemUsage), pct(n.MemUsage, n.MemCap)))
 		}
-		fmt.Println("└────────────────────────┴──────────┴──────────────┴──────────────┴──────────┴────────────┘")
+		fmt.Printf("  │ Pods             │ %-24s │\n", fmt.Sprintf("%d / %d", n.Pods, n.PodCap))
+		fmt.Println("  └──────────────────┴──────────────────────────┘")
 	}
 }
 
 func shortenName(name string) string {
-	if len(name) > 22 {
-		return name[:22]
+	if strings.Contains(name, ".ec2.internal") {
+		name = strings.TrimSuffix(name, ".ec2.internal")
+	}
+	if strings.HasPrefix(name, "ip-") {
+		name = strings.ReplaceAll(name[3:], "-", ".")
 	}
 	return name
 }

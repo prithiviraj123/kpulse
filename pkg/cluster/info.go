@@ -87,9 +87,27 @@ func Show(k *KClient) {
 		}
 	}
 
+	// Shorten version for display
+	displayVersion := k.ClusterVersion
+	if idx := strings.Index(displayVersion, "-eks"); idx > 0 {
+		displayVersion = displayVersion[:idx]
+	}
+
+	// Shorten cluster name for display
+	displayName := k.ClusterName
+	if len(displayName) > 40 {
+		parts := strings.Split(displayName, "/")
+		if len(parts) > 1 {
+			displayName = parts[len(parts)-1]
+		}
+	}
+
 	fmt.Println()
-	fmt.Println("╔══════════════════════════════════════════════════════════════╗")
-	fmt.Printf("║  🔵 KPULSE — Cluster: %-37s ║\n", k.ClusterName)
-	fmt.Printf("║     Version: %-10s  Region: %-8s  Nodes: %-5d    ║\n", k.ClusterVersion, region, nodeCount)
-	fmt.Println("╚══════════════════════════════════════════════════════════════╝")
+	fmt.Println("🔵 KPULSE")
+	fmt.Println("┌──────────────┬──────────────────┐")
+	fmt.Printf("│ Cluster      │ %-16s │\n", displayName)
+	fmt.Printf("│ Version      │ %-16s │\n", displayVersion)
+	fmt.Printf("│ Region       │ %-16s │\n", region)
+	fmt.Printf("│ Nodes        │ %-16d │\n", nodeCount)
+	fmt.Println("└──────────────┴──────────────────┘")
 }
