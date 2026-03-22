@@ -23,8 +23,11 @@ dockers:
       - "prithiviraj123/kpulse:{{ .Tag }}"
       - "prithiviraj123/kpulse:latest"
     dockerfile: Dockerfile
+    use: buildx
     build_flag_templates:
       - "--platform=linux/amd64"
+    goarch: amd64
+    goos: linux
 
 brews:
   - repository:
