@@ -54,7 +54,7 @@ spec:
       serviceAccountName: kpulse
       containers:
         - name: kpulse
-          image: prithiviraj123/kpulse:v0.1.0
+          image: prithiviraj123/kpulse:v0.1.1
           command: ["sh", "-c", "while true; do sleep 3600; done"]
           resources:
             requests:
