@@ -8,6 +8,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
@@ -22,10 +23,14 @@ type KClient struct {
 }
 
 func NewClient() (*KClient, error) {
-	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	// Try in-cluster config first, then fall back to kubeconfig
+	config, err := rest.InClusterConfig()
 	if err != nil {
-		return nil, fmt.Errorf("kubeconfig: %w", err)
+		kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			return nil, fmt.Errorf("kubeconfig: %w", err)
+		}
 	}
 
 	client, err := kubernetes.NewForConfig(config)
