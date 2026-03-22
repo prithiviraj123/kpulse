@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kpulse
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kpulse
+  namespace: kpulse
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kpulse
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods", "namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kpulse
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kpulse
+subjects:
+  - kind: ServiceAccount
+    name: kpulse
+    namespace: kpulse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kpulse
+  namespace: kpulse
+  labels:
+    app: kpulse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kpulse
+  template:
+    metadata:
+      labels:
+        app: kpulse
+    spec:
+      serviceAccountName: kpulse
+      containers:
+        - name: kpulse
+          image: prithiviraj123/kpulse:v0.1.0
+          command: ["sh", "-c", "while true; do sleep 3600; done"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
